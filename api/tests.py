@@ -8,7 +8,6 @@ from rest_framework import status
 from django.urls import reverse
 
 class ModelTestCase(TestCase):
-
     def setUp(self):
         # self.eventOrginizers_event_id = 23
         # self.eventOrginizers_user_id = 23
