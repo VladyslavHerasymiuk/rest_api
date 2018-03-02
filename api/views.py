@@ -175,7 +175,6 @@ class GetUsers(APIView):
 
         items = list(zip(*list(request.data.items())))
         items[0] = list(map(lambda x: re.sub('[\s()-]', '', x.strip('+')), items[0]))
-        print(items[0])
         users = Users.objects.raw('SELECT id_user FROM users WHERE number in {}'.format(tuple(items[0])))
         users_id_number = [(i.id_user, i.number) for i in users]
         for i in users_id_number:
