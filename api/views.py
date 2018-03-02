@@ -11,6 +11,7 @@ from django.http import Http404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+import re
 
 
 # class CreateView(generics.ListCreateAPIView):
@@ -162,6 +163,14 @@ class UsersDetail(APIView):
 class GetUsers(APIView):
 
     def post(self, request, format=None):
-        data = request.data
-
-        return Response(data)
+        items = list(zip(*list(request.data.items())))
+        items[0] = list(map(lambda x: re.sub('\s', '', x.strip('+')), items[0]))
+        users = Users.objects.raw('SELECT id_user FROM users WHERE number in {}'.format(tuple(items[0])))
+        users_id_number = [(i.id_user, i.number) for i in users]
+        for i in users_id_number:
+                items[0][items[0].index('{}'.format(i[1]))] = i[0]
+                #items[0] = [i[0] if val == i[1] else None for val in items[0]]
+        items = dict(zip(*items))
+        list(map(lambda x: x if type(x) == int else items.pop(x, None),list(items)))
+        
+        return Response(items)
