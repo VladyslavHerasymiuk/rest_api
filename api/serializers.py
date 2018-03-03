@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Users
+from .models import Users, Events
 
 
 # class EventOrginizers_Serializer(serializers.ModelSerializer):
@@ -16,13 +16,13 @@ from .models import Users
 #         fields = ('event_id', 'user_id', 'status')
 #         read_only_fields = ('event_id', 'user_id', 'status')
 #
-# class Events_Serializer(serializers.ModelSerializer):
-#
-#     class Meta:
-#         model = Events
-#         fields = ('id','initializer','location','date','time','title')
-#         read_only_fields = ('id','initializer','location','date','time','title')
-#
+class Events_Serializer(serializers.HyperlinkedModelSerializer):
+
+    class Meta:
+        model = Events
+        fields = ('id_event','title','location','date_time','price','tags', 'desctiption')
+        read_only_fields = ()
+
 class Users_Serializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:

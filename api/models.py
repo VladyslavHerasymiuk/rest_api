@@ -37,7 +37,7 @@ class Events(models.Model):
     location = models.CharField(max_length=45, blank=True, null=True)
     date_time = models.DateTimeField(blank=True, null=True)
     price = models.IntegerField(blank=True, null=True)
-    tegs = models.CharField(max_length=60, blank=True, null=True)
+    tags = models.CharField(max_length=60, blank=True, null=True)
     desctiption = models.TextField(blank=True, null=True)
 
     class Meta:
