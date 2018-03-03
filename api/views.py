@@ -1,9 +1,12 @@
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, HttpResponseServerError
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 from rest_framework.parsers import JSONParser
-from .serializers import Users_Serializer
-from .models import Users
+from .serializers import Users_Serializer, Events_Serializer
+from .models import Users, Events
+
+
+
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -13,6 +16,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import generics
 import re
+import datetime
 
 # class CreateView(generics.ListCreateAPIView):
 #     """This class defines the create behavior of our rest api."""
@@ -169,6 +173,16 @@ class UsersDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Users.objects.all()
     serializer_class = Users_Serializer
 
+class EventsList(generics.ListCreateAPIView):
+
+    queryset = Events.objects.all()
+    serializer_class = Events_Serializer
+
+
+class EventsDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Events.objects.all()
+    serializer_class = Events_Serializer
+
 class GetUsers(APIView):
 
     def post(self, request, format=None):
@@ -177,6 +191,7 @@ class GetUsers(APIView):
         items[0] = list(map(lambda x: re.sub('[\s()-]', '', x.strip('+')), items[0]))
         users = Users.objects.raw('SELECT id_user FROM users WHERE number in {}'.format(tuple(items[0])))
         users_id_number = [(i.id_user, i.number) for i in users]
+
         for i in users_id_number:
                 items[0][items[0].index('{}'.format(i[1]))] = i[0]
                 #items[0] = [i[0] if val == i[1] else None for val in items[0]]
@@ -184,3 +199,22 @@ class GetUsers(APIView):
         list(map(lambda x: x if type(x) == int else items.pop(x, None),list(items)))
 
         return Response(items)
+
+class GetEvents(APIView):
+
+    def get_object(self, time):
+
+            if time == 'past':
+                    return Events.objects.raw("select * from db_rest_app.events where date(date_time)  < '{}';".format(datetime.date.today()))
+            elif time == 'present':
+                return Events.objects.raw("select * from db_rest_app.events where date(date_time)  = '{}';".format(datetime.date.today()))
+            elif time == 'future':
+                return Events.objects.raw("select * from db_rest_app.events where date(date_time)  > '{}';".format(datetime.date.today()))
+            else:
+                raise Http404
+
+
+    def get(self, request, time, format=None):
+        events = self.get_object(time)
+        serializer = Events_Serializer(events, many=True)
+        return Response(serializer.data)
