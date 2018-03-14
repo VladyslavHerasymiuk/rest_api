@@ -13,7 +13,7 @@ urlpatterns = {
     url(r'^events/(?P<pk>[0-9]+)/$', EventsDetail.as_view()),
     url(r'^eventusers/$', EventUsersList.as_view()),
     url(r'^eventusers/(?P<pk>[0-9]+)/$', EventUsersDetail.as_view()),
-    url(r'^events/(?P<time>[past,present, future]+)/$', GetEvents.as_view()),
+    url(r'^events/(?P<time>[past,present, future]+)/(?P<pk>[0-9]+)/$', GetEvents.as_view()),
     url(r'^getusers/$', GetUsers.as_view()),
     url(r'^changeuserrating/(?P<pk>[0-9]+)/$', ChangeUserRating.as_view()),
 }
@@ -25,4 +25,6 @@ urlpatterns = {
 
 
 urlpatterns = format_suffix_patterns(urlpatterns)
+
+
 
