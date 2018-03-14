@@ -49,4 +49,12 @@ class Users_Serializer(serializers.HyperlinkedModelSerializer):
         model = Users
         fields = ('id_user' ,'name','age','email','number','rating_plus', 'rating_minus', 'rating_zero', 'username')
 
+class Events_Serializer_Time(serializers.ModelSerializer):
+
+    class Meta:
+        model = Events
+        fields = ('id_event','title','location','date_time','price','tags', 'desctiption')
+
+
+
 
