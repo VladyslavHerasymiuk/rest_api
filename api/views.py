@@ -245,8 +245,6 @@ class GetEvents(APIView):
         events = self.get_object(time)
         serializer = Events_Serializer(events, many=True)
         return Response(serializer.data)
-<<<<<<< HEAD
-=======
 
 class EventUsersList(generics.ListCreateAPIView):
 
@@ -337,4 +335,3 @@ class ChangeUserRating(APIView):
 
 
 
->>>>>>> 5f56e68c5de349d0f9be58b5512e0856a10aece5
