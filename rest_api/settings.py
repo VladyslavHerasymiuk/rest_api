@@ -25,7 +25,8 @@ SECRET_KEY = 'y4ry!o5zv+7c33sy8(zps(3%efs_)7y!(g$%wr_of(m$yr4vo)'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['raynem.pythonanywhere.com', 'localhost', '127.0.0.1']
+
 
 
 # Application definition
@@ -80,10 +81,10 @@ WSGI_APPLICATION = 'rest_api.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'db_rest_app',
-        'USER': 'root',
-        'PASSWORD': '1111',
-        'HOST': 'localhost',
+        'NAME': 'raynem$db_app',
+        'USER': 'raynem',
+        'PASSWORD': '07erires',
+        'HOST': 'raynem.mysql.pythonanywhere-services.com',
     }
 }
 

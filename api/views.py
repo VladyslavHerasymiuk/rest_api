@@ -205,11 +205,11 @@ class GetEvents(APIView):
     def get_object(self, time):
 
             if time == 'past':
-                    return Events.objects.raw("select * from db_rest_app.events where date(date_time)  < '{}';".format(datetime.date.today()))
+                    return Events.objects.raw("select * from events where date(date_time)  < '{}';".format(datetime.date.today()))
             elif time == 'present':
-                return Events.objects.raw("select * from db_rest_app.events where date(date_time)  = '{}';".format(datetime.date.today()))
+                return Events.objects.raw("select * from events where date(date_time)  = '{}';".format(datetime.date.today()))
             elif time == 'future':
-                return Events.objects.raw("select * from db_rest_app.events where date(date_time)  > '{}';".format(datetime.date.today()))
+                return Events.objects.raw("select * from events where date(date_time)  > '{}';".format(datetime.date.today()))
             else:
                 raise Http404
 
