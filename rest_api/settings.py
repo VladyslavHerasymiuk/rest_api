@@ -25,7 +25,7 @@ SECRET_KEY = 'y4ry!o5zv+7c33sy8(zps(3%efs_)7y!(g$%wr_of(m$yr4vo)'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['raynem.pythonanywhere.com', 'localhost', '127.0.0.1']
 
 
 # Application definition
