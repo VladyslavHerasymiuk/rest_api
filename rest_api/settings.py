@@ -26,7 +26,10 @@ SECRET_KEY = 'y4ry!o5zv+7c33sy8(zps(3%efs_)7y!(g$%wr_of(m$yr4vo)'
 DEBUG = True
 
 ALLOWED_HOSTS = ['raynem.pythonanywhere.com', 'localhost', '127.0.0.1']
+<<<<<<< HEAD
 
+=======
+>>>>>>> 5f56e68c5de349d0f9be58b5512e0856a10aece5
 
 
 # Application definition
