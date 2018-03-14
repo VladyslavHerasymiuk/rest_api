@@ -7,7 +7,6 @@
 # Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
 
-
 class AfterEvent(models.Model):
     id_event = models.IntegerField(primary_key=True)
     title = models.CharField(max_length=45, blank=True, null=True)
@@ -20,7 +19,7 @@ class AfterEvent(models.Model):
 
 
 class EventUsers(models.Model):
-    id_event = models.ForeignKey('Events', models.DO_NOTHING, db_column='id_event', primary_key=True)
+    id_event = models.ForeignKey('Events', models.DO_NOTHING, db_column='id_event', primary_key=True, related_name='eventusers')
     id_user = models.ForeignKey('Users', models.DO_NOTHING, db_column='id_user')
     status = models.TextField(blank=True, null=True)
     organizer = models.IntegerField(blank=True, null=True)

@@ -2,8 +2,8 @@ from django.http import JsonResponse, HttpResponse, HttpResponseServerError
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 from rest_framework.parsers import JSONParser
-from .serializers import Users_Serializer, Events_Serializer
-from .models import Users, Events
+from .serializers import Users_Serializer, Events_Serializer, EventUsers_Serializer
+from .models import Users, Events, EventUsers
 
 
 
@@ -17,6 +17,8 @@ from rest_framework import status
 from rest_framework import generics
 import re
 import datetime
+from rest_framework import mixins
+from rest_framework import generics
 
 # class CreateView(generics.ListCreateAPIView):
 #     """This class defines the create behavior of our rest api."""
@@ -168,20 +170,43 @@ class UsersList(generics.ListCreateAPIView):
     queryset = Users.objects.all()
     serializer_class = Users_Serializer
 
-
 class UsersDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Users.objects.all()
     serializer_class = Users_Serializer
+
 
 class EventsList(generics.ListCreateAPIView):
 
     queryset = Events.objects.all()
     serializer_class = Events_Serializer
 
+class EventsDetail(APIView):
 
-class EventsDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Events.objects.all()
-    serializer_class = Events_Serializer
+    def get_object(self, pk):
+        try:
+            return Events.objects.get(pk=pk)
+        except Users.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk, format=None):
+        snippet = self.get_object(pk)
+        serializer = Events_Serializer(snippet)
+        return Response(serializer.data)
+
+    def put(self, request, pk, format=None):
+        snippet = self.get_object(pk)
+        serializer = Events_Serializer(snippet, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk, format=None):
+        eventusers = EventUsers.objects.filter(id_event=pk)
+        events = self.get_object(pk)
+        eventusers.delete()
+        events.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 class GetUsers(APIView):
 
@@ -205,16 +230,108 @@ class GetEvents(APIView):
     def get_object(self, time):
 
             if time == 'past':
-                    return Events.objects.raw("select * from db_rest_app.events where date(date_time)  < '{}';".format(datetime.date.today()))
+                    return Events.objects.raw("select * from events where date(date_time)  < '{}';".format(datetime.date.today()))
             elif time == 'present':
-                return Events.objects.raw("select * from db_rest_app.events where date(date_time)  = '{}';".format(datetime.date.today()))
+                return Events.objects.raw("select * from events where date(date_time)  = '{}';".format(datetime.date.today()))
             elif time == 'future':
-                return Events.objects.raw("select * from db_rest_app.events where date(date_time)  > '{}';".format(datetime.date.today()))
+                return Events.objects.raw("select * from events where date(date_time)  > '{}';".format(datetime.date.today()))
             else:
                 raise Http404
 
-
     def get(self, request, time, format=None):
+
+        data = request.data
+
         events = self.get_object(time)
         serializer = Events_Serializer(events, many=True)
         return Response(serializer.data)
+
+class EventUsersList(generics.ListCreateAPIView):
+
+    queryset = EventUsers.objects.all()
+    serializer_class = EventUsers_Serializer
+
+class EventUsersDetail(APIView):
+    """
+    Retrieve, update or delete a snippet instance.
+    """
+    def get_object(self, pk):
+        try:
+            return EventUsers.objects.filter(id_event=pk)
+        except Users.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk, format=None):
+        snippet = self.get_object(pk)
+        serializer = EventUsers_Serializer(snippet, many=True)
+        return Response(serializer.data)
+
+    def put(self, request, pk, format=None):
+        snippet = self.get_object(pk)
+        serializer = EventUsers_Serializer(snippet, data=request.data, many=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk, format=None):
+        snippet = self.get_object(pk)
+        snippet.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+class ChangeUserRating(APIView):
+
+    def get_object(self, pk):
+        try:
+            return Users.objects.get(pk=pk)
+        except Users.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk, format=None):
+        user = self.get_object(pk)
+        serializer = Users_Serializer(user)
+        return Response(serializer.data)
+
+    def put(self, request, pk, format=None):
+        user = self.get_object(pk)
+        data = request.data
+        if 'old' in data:
+            old_val, new_val = int(data['old']), int(data['new'])
+            user_ratings = Users.objects.raw('SELECT id_user,rating_plus,rating_minus,rating_zero FROM users WHERE id_user = {}'.format(pk))
+            user_ratings = [(i.rating_plus, i.rating_minus, i.rating_zero) for i in user_ratings]
+
+            if old_val == -1:
+                if new_val == 0:
+                    data = dict(rating_minus=user_ratings[0][1] - 1, rating_zero=user_ratings[0][2] + 1)
+                elif new_val == 1:
+                    data = dict(rating_minus=user_ratings[0][1] - 1, rating_zero=user_ratings[0][0] + 1)
+            elif old_val == 0:
+                if new_val == -1:
+                    data = dict(rating_minus=user_ratings[0][2] - 1, rating_zero=user_ratings[0][1] + 1)
+                elif new_val == 1:
+                    data = dict(rating_minus=user_ratings[0][2] - 1, rating_zero=user_ratings[0][0] + 1)
+            elif old_val == 1:
+                if new_val == 0:
+                    data = dict(rating_minus=user_ratings[0][0] - 1, rating_zero=user_ratings[0][2] + 1)
+                elif new_val == -1:
+                    data = dict(rating_minus=user_ratings[0][0] - 1, rating_zero=user_ratings[0][1] + 1)
+        elif 'new' in data:
+            new_val = int(data['new'])
+            user_ratings = Users.objects.raw('SELECT id_user,rating_plus,rating_minus,rating_zero FROM users WHERE id_user = {}'.format(pk))
+            user_ratings = [(i.rating_plus, i.rating_minus, i.rating_zero) for i in user_ratings]
+
+            if new_val == -1:
+                    data = dict(rating_minus=user_ratings[0][1] + 1)
+            elif new_val == 0:
+                    data = dict(rating_zero=user_ratings[0][2] + 1)
+            elif new_val == 1:
+                    data = dict(rating_plus=user_ratings[0][0] + 1)
+
+        serializer = Users_Serializer(user, data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
