@@ -2,7 +2,7 @@ from django.http import JsonResponse, HttpResponse, HttpResponseServerError
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 from rest_framework.parsers import JSONParser
-from .serializers import Users_Serializer, Events_Serializer, EventUsers_Serializer
+from .serializers import Users_Serializer, Events_Serializer, EventUsers_Serializer, Events_Serializer_Time
 from .models import Users, Events, EventUsers
 
 
@@ -227,23 +227,25 @@ class GetUsers(APIView):
 
 class GetEvents(APIView):
 
-    def get_object(self, time):
+    def get_object(self, time, pk):
 
             if time == 'past':
-                    return Events.objects.raw("select * from events where date(date_time)  < '{}';".format(datetime.date.today()))
+                return Events.objects.raw("select e.* from events as e inner join event_users as es on es.id_event = e.id_event where es.id_user = '{}' and date(e.date_time) < '{}';".format(pk, datetime.date.today()))
             elif time == 'present':
-                return Events.objects.raw("select * from events where date(date_time)  = '{}';".format(datetime.date.today()))
+                return Events.objects.raw(
+                    "select e.* from events as e inner join event_users as es on es.id_event = e.id_event where es.id_user = '{}' and date(e.date_time) = '{}';".format(
+                    pk, datetime.date.today()))
             elif time == 'future':
-                return Events.objects.raw("select * from events where date(date_time)  > '{}';".format(datetime.date.today()))
+                return Events.objects.raw(
+                    "select e.* from events as e inner join event_users as es on es.id_event = e.id_event where es.id_user = '{}' and date(e.date_time) > '{}';".format(
+                    pk, datetime.date.today()))
             else:
                 raise Http404
 
-    def get(self, request, time, format=None):
+    def get(self, request, time, pk, format=None):
 
-        data = request.data
-
-        events = self.get_object(time)
-        serializer = Events_Serializer(events, many=True)
+        events = self.get_object(time, pk)
+        serializer = Events_Serializer_Time(events, many=True)
         return Response(serializer.data)
 
 class EventUsersList(generics.ListCreateAPIView):
@@ -332,6 +334,9 @@ class ChangeUserRating(APIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
 
 
 
