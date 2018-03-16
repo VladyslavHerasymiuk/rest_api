@@ -1,6 +1,6 @@
 from django.conf.urls import url, include
 from rest_framework.urlpatterns import format_suffix_patterns
-from .views import UsersList, UsersDetail, EventsDetail, EventsList, GetUsers, GetEvents, EventUsersList, EventUsersDetail,ChangeUserRating
+from .views import UsersList, UsersDetail, EventsDetail, EventsList, GetUsers, GetEvents, EventUsersList, EventUsersDetail,ChangeUserRating, GetEventsTime
 
 #from .views import snippet_list
 #from .views import snippet_detail
@@ -14,6 +14,7 @@ urlpatterns = {
     url(r'^eventusers/$', EventUsersList.as_view()),
     url(r'^eventusers/(?P<pk>[0-9]+)/$', EventUsersDetail.as_view()),
     url(r'^events/(?P<time>[past,present, future]+)/(?P<pk>[0-9]+)/$', GetEvents.as_view()),
+    url(r'^events/(?P<time>[past,present, future]+)/$', GetEventsTime.as_view()), #temporarily url
     url(r'^getusers/$', GetUsers.as_view()),
     url(r'^changeuserrating/(?P<pk>[0-9]+)/$', ChangeUserRating.as_view()),
 }
@@ -25,6 +26,4 @@ urlpatterns = {
 
 
 urlpatterns = format_suffix_patterns(urlpatterns)
-
-
 
