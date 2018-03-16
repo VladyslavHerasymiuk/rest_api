@@ -248,6 +248,27 @@ class GetEvents(APIView):
         serializer = Events_Serializer_Time(events, many=True)
         return Response(serializer.data)
 
+
+#temporarily view
+class GetEventsTime(APIView):
+
+    def get_object(self, time):
+
+            if time == 'past':
+                return Events.objects.raw("select * from events  where date(date_time) < '{}';".format(datetime.date.today()))
+            elif time == 'present':
+                return Events.objects.raw("select * from events  where date(date_time) = '{}';".format(datetime.date.today()))
+            elif time == 'future':
+                return Events.objects.raw("select * from events  where date(date_time) > '{}';".format(datetime.date.today()))
+            else:
+                raise Http404
+
+    def get(self, request, time, format=None):
+
+        events = self.get_object(time)
+        serializer = Events_Serializer_Time(events, many=True)
+        return Response(serializer.data)
+
 class EventUsersList(generics.ListCreateAPIView):
 
     queryset = EventUsers.objects.all()
@@ -334,9 +355,6 @@ class ChangeUserRating(APIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-
 
 
 
